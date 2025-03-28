@@ -153,6 +153,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
 
     private val permissionListener = object : MultiplePermissionsListener {
         override fun onPermissionsChecked(p0: MultiplePermissionsReport?) {
+            Log.i("Permission listener", "testing")
             startRecording()
         }
 
