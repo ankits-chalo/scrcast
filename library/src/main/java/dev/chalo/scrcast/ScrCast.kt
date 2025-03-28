@@ -1,4 +1,4 @@
-package dev.bmcreations.scrcast
+package dev.chalo.scrcast
 
 import android.Manifest
 import android.app.Activity
@@ -154,12 +154,13 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
     private val permissionListener = object : MultiplePermissionsListener {
         override fun onPermissionsChecked(p0: MultiplePermissionsReport?) {
             Log.i("Permission listener", "testing")
-            if (report.areAllPermissionsGranted()) {
+            if (p0.areAllPermissionsGranted()) {
                 // All permissions are granted. Proceed with recording.
                 startRecording()
             } else {
+                val message = "Permission denied"
                 // At least one permission is denied. Handle accordingly.
-                handlePermissionDenial()
+                return webView.evaluateJavascript("handlePermissionStatus('$message');", null)
             }
         }
 
@@ -271,13 +272,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
      */
     fun record() {
         when (state) {
-            is Idle -> {
-                Dexter.withContext(activity)
-                    .withPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.RECORD_AUDIO)
-                    .withListener(CompositeMultiplePermissionsListener(permissionListener, dialogPermissionListener))
-                    .check()
-            }
+            is Idle ->  startRecording()
             Paused -> resume()
             Recording -> stopRecording()
             is Delay -> { /* Prevent erroneous calls to record while in start delay */}
