@@ -1,9 +1,9 @@
-package dev.bmcreations.scrcast.internal.recorder
+package dev.chalo.scrcast.internal.recorder
 
 import androidx.annotation.DrawableRes
 import androidx.annotation.RestrictTo
 import androidx.annotation.StringRes
-import dev.bmcreations.scrcast.R
+import dev.chalo.scrcast.R
 
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 sealed class Action(

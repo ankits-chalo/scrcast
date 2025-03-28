@@ -1,13 +1,13 @@
-package dev.bmcreations.scrcast.internal.recorder.receiver
+package dev.chalo.scrcast.internal.recorder.receiver
 
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.RestrictTo
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import dev.bmcreations.scrcast.internal.recorder.ACTION_PAUSE
-import dev.bmcreations.scrcast.internal.recorder.ACTION_RESUME
-import dev.bmcreations.scrcast.internal.recorder.ACTION_STOP
+import dev.chalo.scrcast.internal.recorder.ACTION_PAUSE
+import dev.chalo.scrcast.internal.recorder.ACTION_RESUME
+import dev.chalo.scrcast.internal.recorder.ACTION_STOP
 
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 class RecordingNotificationReceiver : BroadcastReceiver() {

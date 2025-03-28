@@ -1,8 +1,8 @@
-package dev.bmcreations.scrcast.lifecycle
+package dev.chalo.scrcast.lifecycle
 
 import androidx.lifecycle.*
-import dev.bmcreations.scrcast.ScrCast
-import dev.bmcreations.scrcast.recorder.RecordingState
+import dev.chalo.scrcast.ScrCast
+import dev.chalo.scrcast.recorder.RecordingState
 
 private class LiveEvent constructor(
     private val recorder: ScrCast,

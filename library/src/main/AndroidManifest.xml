@@ -1,6 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="dev.bmcreations.scrcast">
+    package="dev.chalo.scrcast">
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
@@ -12,11 +12,11 @@
         android:requestLegacyExternalStorage="true"
         tools:targetApi="q">
 
-        <service android:name="dev.bmcreations.scrcast.internal.recorder.service.RecorderService"
+        <service android:name="dev.chalo.scrcast.internal.recorder.service.RecorderService"
             android:foregroundServiceType="mediaProjection"
             tools:targetApi="q" />
 
-        <receiver android:name="dev.bmcreations.scrcast.internal.recorder.receiver.RecordingNotificationReceiver" />
+        <receiver android:name="dev.chalo.scrcast.internal.recorder.receiver.RecordingNotificationReceiver" />
 
     </application>
 

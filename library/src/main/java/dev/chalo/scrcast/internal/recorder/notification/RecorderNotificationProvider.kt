@@ -1,4 +1,4 @@
-package dev.bmcreations.scrcast.internal.recorder.notification
+package dev.chalo.scrcast.internal.recorder.notification
 
 import android.app.Notification
 import android.app.NotificationManager
@@ -9,12 +9,12 @@ import android.graphics.drawable.Icon
 import android.os.Build
 import androidx.annotation.RestrictTo
 import androidx.core.content.ContextCompat
-import dev.bmcreations.scrcast.config.NotificationConfig
-import dev.bmcreations.scrcast.extensions.supportsPauseResume
-import dev.bmcreations.scrcast.internal.recorder.Action
-import dev.bmcreations.scrcast.internal.recorder.receiver.RecordingNotificationReceiver
-import dev.bmcreations.scrcast.recorder.RecordingState
-import dev.bmcreations.scrcast.recorder.notification.NotificationProvider
+import dev.chalo.scrcast.config.NotificationConfig
+import dev.chalo.scrcast.extensions.supportsPauseResume
+import dev.chalo.scrcast.internal.recorder.Action
+import dev.chalo.scrcast.internal.recorder.receiver.RecordingNotificationReceiver
+import dev.chalo.scrcast.recorder.RecordingState
+import dev.chalo.scrcast.recorder.notification.NotificationProvider
 
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 class RecorderNotificationProvider(

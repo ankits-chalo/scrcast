@@ -1,4 +1,4 @@
-package dev.bmcreations.scrcast.app.list
+package dev.chalo.scrcast.app.list
 
 
 import android.os.Bundle
@@ -8,10 +8,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.drawable.toBitmap
 import androidx.core.view.isVisible
 import com.google.android.material.snackbar.Snackbar
-import dev.bmcreations.scrcast.ScrCast
-import dev.bmcreations.scrcast.app.R
-import dev.bmcreations.scrcast.extensions.supportsPauseResume
-import dev.bmcreations.scrcast.recorder.RecordingState
+import dev.chalo.scrcast.ScrCast
+import dev.chalo.scrcast.app.R
+import dev.chalo.scrcast.extensions.supportsPauseResume
+import dev.chalo.scrcast.recorder.RecordingState
 import kotlinx.android.synthetic.main.activity_main.*
 
 

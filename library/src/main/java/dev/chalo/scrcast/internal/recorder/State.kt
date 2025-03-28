@@ -1,7 +1,7 @@
-package dev.bmcreations.scrcast.internal.recorder
+package dev.chalo.scrcast.internal.recorder
 
 import androidx.annotation.RestrictTo
-import dev.bmcreations.scrcast.recorder.RecordingState
+import dev.chalo.scrcast.recorder.RecordingState
 
 @RestrictTo(RestrictTo.Scope.LIBRARY)
 const val STATE_RECORDING = "scrcast.internal.state.RECORDING"

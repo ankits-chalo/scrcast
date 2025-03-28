@@ -1,4 +1,4 @@
-package dev.bmcreations.scrcast.internal.recorder.service
+package dev.chalo.scrcast.internal.recorder.service
 
 import android.app.Service
 import android.content.BroadcastReceiver
@@ -18,11 +18,11 @@ import android.os.IBinder
 import android.util.Log
 import androidx.annotation.RestrictTo
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
-import dev.bmcreations.scrcast.config.Options
-import dev.bmcreations.scrcast.internal.extensions.countdown
-import dev.bmcreations.scrcast.internal.recorder.*
-import dev.bmcreations.scrcast.recorder.*
-import dev.bmcreations.scrcast.recorder.notification.NotificationProvider
+import dev.chalo.scrcast.config.Options
+import dev.chalo.scrcast.internal.extensions.countdown
+import dev.chalo.scrcast.internal.recorder.*
+import dev.chalo.scrcast.recorder.*
+import dev.chalo.scrcast.recorder.notification.NotificationProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

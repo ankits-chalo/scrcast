@@ -1,6 +1,6 @@
-package dev.bmcreations.scrcast.recorder
+package dev.chalo.scrcast.recorder
 
-import dev.bmcreations.scrcast.ScrCast
+import dev.chalo.scrcast.ScrCast
 import java.io.File
 
 /**

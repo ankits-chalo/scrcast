@@ -1,4 +1,4 @@
-package dev.bmcreations.scrcast.livedata
+package dev.chalo.scrcast.livedata
 
 import org.junit.Test
 

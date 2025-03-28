@@ -1,11 +1,11 @@
-package dev.bmcreations.scrcast.app.list
+package dev.chalo.scrcast.app.list
 
 import android.app.Notification
 import android.content.Context
 import android.os.Build
-import dev.bmcreations.scrcast.app.R
-import dev.bmcreations.scrcast.recorder.RecordingState
-import dev.bmcreations.scrcast.recorder.notification.NotificationProvider
+import dev.chalo.scrcast.app.R
+import dev.chalo.scrcast.recorder.RecordingState
+import dev.chalo.scrcast.recorder.notification.NotificationProvider
 
 class SimpleNotificationProvider(private val context: Context) : NotificationProvider(context) {
 

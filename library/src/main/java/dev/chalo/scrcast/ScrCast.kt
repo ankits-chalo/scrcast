@@ -23,17 +23,17 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.CompositeMultiplePermissionsListener
 import com.karumi.dexter.listener.multi.DialogOnAnyDeniedMultiplePermissionsListener
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
-import dev.bmcreations.scrcast.config.Options
-import dev.bmcreations.scrcast.internal.config.dsl.OptionsBuilder
-import dev.bmcreations.scrcast.extensions.supportsPauseResume
-import dev.bmcreations.scrcast.internal.recorder.*
-import dev.bmcreations.scrcast.recorder.*
-import dev.bmcreations.scrcast.recorder.RecordingState.*
-import dev.bmcreations.scrcast.recorder.RecordingStateChangeCallback
-import dev.bmcreations.scrcast.recorder.notification.NotificationProvider
-import dev.bmcreations.scrcast.internal.recorder.notification.RecorderNotificationProvider
-import dev.bmcreations.scrcast.internal.recorder.service.RecorderService
-import dev.bmcreations.scrcast.internal.request.RecordScreen
+import dev.chalo.scrcast.config.Options
+import dev.chalo.scrcast.internal.config.dsl.OptionsBuilder
+import dev.chalo.scrcast.extensions.supportsPauseResume
+import dev.chalo.scrcast.internal.recorder.*
+import dev.chalo.scrcast.recorder.*
+import dev.chalo.scrcast.recorder.RecordingState.*
+import dev.chalo.scrcast.recorder.RecordingStateChangeCallback
+import dev.chalo.scrcast.recorder.notification.NotificationProvider
+import dev.chalo.scrcast.internal.recorder.notification.RecorderNotificationProvider
+import dev.chalo.scrcast.internal.recorder.service.RecorderService
+import dev.chalo.scrcast.internal.request.RecordScreen
 import java.io.File
 
 /**

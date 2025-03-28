@@ -1,8 +1,8 @@
-package dev.bmcreations.scrcast.app.list
+package dev.chalo.scrcast.app.list
 
 import android.os.Bundle
 import androidx.lifecycle.Observer
-import dev.bmcreations.scrcast.lifecycle.observeRecordingState
+import dev.chalo.scrcast.lifecycle.observeRecordingState
 
 class StateObserverActivity : MainActivity() {
 

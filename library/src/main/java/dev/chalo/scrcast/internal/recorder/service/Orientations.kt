@@ -1,4 +1,4 @@
-package dev.bmcreations.scrcast.internal.recorder.service
+package dev.chalo.scrcast.internal.recorder.service
 
 import android.util.SparseIntArray
 import android.view.Surface

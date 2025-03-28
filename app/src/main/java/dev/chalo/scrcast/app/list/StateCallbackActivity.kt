@@ -1,4 +1,4 @@
-package dev.bmcreations.scrcast.app.list
+package dev.chalo.scrcast.app.list
 
 class StateCallbackActivity : MainActivity() {
 

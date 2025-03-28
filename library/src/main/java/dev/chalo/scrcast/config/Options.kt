@@ -1,4 +1,4 @@
-package dev.bmcreations.scrcast.config
+package dev.chalo.scrcast.config
 
 import android.app.Notification
 import android.app.NotificationChannel
@@ -13,7 +13,7 @@ import android.util.DisplayMetrics
 import android.util.Log
 import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
-import dev.bmcreations.scrcast.R
+import dev.chalo.scrcast.R
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.parcel.RawValue
 import kotlin.jvm.functions.FunctionN
@@ -21,9 +21,9 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 
-import dev.bmcreations.scrcast.ScrCast
-import dev.bmcreations.scrcast.recorder.RecordingState
-import dev.bmcreations.scrcast.recorder.RecordingCallbacks
+import dev.chalo.scrcast.ScrCast
+import dev.chalo.scrcast.recorder.RecordingState
+import dev.chalo.scrcast.recorder.RecordingCallbacks
 import kotlinx.android.parcel.IgnoredOnParcel
 
 /**

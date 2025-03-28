@@ -1,4 +1,4 @@
-package dev.bmcreations.scrcast.app.list
+package dev.chalo.scrcast.app.list
 
 import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
@@ -7,10 +7,10 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.annotation.ColorInt
 import androidx.core.content.ContextCompat
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import dev.bmcreations.scrcast.app.R
-import dev.bmcreations.scrcast.recorder.RecordingState
-import dev.bmcreations.scrcast.recorder.RecordingState.Idle
-import dev.bmcreations.scrcast.recorder.RecordingState.Recording
+import dev.chalo.scrcast.app.R
+import dev.chalo.scrcast.recorder.RecordingState
+import dev.chalo.scrcast.recorder.RecordingState.Idle
+import dev.chalo.scrcast.recorder.RecordingState.Recording
 
 @SuppressLint("ObjectAnimatorBinding")
 private fun FloatingActionButton.animateColorChange(@ColorInt fromColor: Int, @ColorInt toColor: Int, startDelay: Long = 0) {
