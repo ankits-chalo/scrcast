@@ -181,6 +181,14 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         }
     }
 
+    private fun handlePermissionDenial() {
+        // Inform the user that the permissions are necessary and handle the denial appropriately
+        val message = "Permission denied"
+        runOnUiThread {
+            webView.evaluateJavascript("handlePermissionStatus('$message');", null)
+        }
+    }
+
     /**
      * Updates the configurations of [ScrCast] via a DSL.
      *
