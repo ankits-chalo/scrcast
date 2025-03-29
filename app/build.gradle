@@ -2,13 +2,14 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-android-extensions'
+    id 'maven-publish'
 }
 
 android {
     compileSdkVersion 29
 
     defaultConfig {
-        applicationId "dev.bmcreations.scrcast.app"
+        applicationId "dev.chalo.scrcast.app"
         minSdkVersion androidbuild.minSdkVersion
         targetSdkVersion androidbuild.targetSdkVersion
         versionCode 1

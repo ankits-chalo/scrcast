@@ -16,7 +16,7 @@ afterEvaluate {
 
             // suppress internal operations from logging to API docs
             perPackageOption {
-                prefix = "dev.bmcreations.scrcast.internal"
+                prefix = "dev.chalo.scrcast.internal"
                 suppress = true
             }
         }

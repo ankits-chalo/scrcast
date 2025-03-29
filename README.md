@@ -5,14 +5,14 @@
 
 A fully, featured replacement for screen recording needs backed by Kotlin with the power of Coroutines and Android Jetpack. scrcast is:
 
-* <b>Easy to use</b>: scrcast's API leverages Kotlin languages features for simplicity, ease of use, and little-to-no boilerplate. Simply configure and `record()`
-* <b>Modern</b>: scrcast is Kotlin-first and uses modern libraries including Coroutines and Android Jetpack.
+- <b>Easy to use</b>: scrcast's API leverages Kotlin languages features for simplicity, ease of use, and little-to-no boilerplate. Simply configure and `record()`
+- <b>Modern</b>: scrcast is Kotlin-first and uses modern libraries including Coroutines and Android Jetpack.
 
 ## Download
 
 scrcast is available on `mavenCentral()`.
 
-`implementation ("dev.bmcreations:scrcast:$version")`
+`implementation ("dev.chalo:scrcast:$version")`
 
 ## Quick Start
 
@@ -85,16 +85,16 @@ State changes are emitted via `RecordingCallbacks` as a single interface or via 
 
 Completed recording output file is also emittable in `RecordingCallbacks` via
 
- ```kotlin
- fun onRecordingFinished(file: File)
- ```
+```kotlin
+fun onRecordingFinished(file: File)
+```
 
 ## Requirements
 
-* AndroidX
-* `minSdkVersion` 23+
-* `compileSdkVersion` 28+
-* Java 8+
+- AndroidX
+- `minSdkVersion` 23+
+- `compileSdkVersion` 28+
+- Java 8+
 
 Gradle (`.gradle`)
 
