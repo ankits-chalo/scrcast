@@ -24,14 +24,13 @@ ext.versions = versions
 
 def plugins = [:]
 plugins.android_build_tools = "com.android.tools.build:gradle:$versions.plugin_build_tools"
-plugins.maven_publish = "com.vanniktech:gradle-maven-publish-plugin:0.13.0"
 plugins.google_services = "com.google.gms:google-services:$versions.plugin_google_services"
 plugins.firebase = "com.google.firebase:firebase-plugins:$versions.plugin_firebase"
 plugins.fabric = "io.fabric.tools:gradle:$versions.plugin_fabric"
 plugins.kotlin = "org.jetbrains.kotlin:kotlin-gradle-plugin:$versions.kotlin"
 plugins.androidx_navigation_safe_args = "androidx.navigation:navigation-safe-args-gradle-plugin:$versions.plugin_androidx_navigation_safe_args"
 plugins.dokka = "org.jetbrains.dokka:dokka-gradle-plugin:$versions.plugin_dokka"
-maven_publish: 'com.vanniktech:gradle-maven-publish-plugin:0.18.0'
+plugins.maven_publish = 'com.vanniktech:gradle-maven-publish-plugin:0.18.0'
 deps.plugins = plugins
 
 def jetpack = [:]
