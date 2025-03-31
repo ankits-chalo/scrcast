@@ -34,7 +34,7 @@ import dev.chalo.scrcast.recorder.notification.NotificationProvider
 import dev.chalo.scrcast.internal.recorder.notification.RecorderNotificationProvider
 import dev.chalo.scrcast.internal.recorder.service.RecorderService
 import dev.chalo.scrcast.internal.request.RecordScreen
-import dev.chalo.scrcast.RecordingCallbacK
+import dev.chalo.scrcast.RecordingCallback
 import java.io.File
 
 /**
