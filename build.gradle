@@ -10,7 +10,6 @@ buildscript {
     dependencies {
         classpath deps.plugins.android_build_tools
         classpath deps.plugins.kotlin
-        classpath deps.plugins.versions
         classpath deps.plugins.maven_publish
         classpath deps.plugins.dokka
     }
