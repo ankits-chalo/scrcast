@@ -42,10 +42,10 @@ import java.io.File
  */
 class ScrCast private constructor(private val activity: ComponentActivity) {
 
-    private RecordingCallback recordingCallback;
+    private var recordingCallback: RecordingCallback? = null
 
-    public void setRecordingCallback(RecordingCallback callback) {
-        this.recordingCallback = callback;
+    fun setRecordingCallback(callback: RecordingCallback) {
+        recordingCallback = callback
     }
 
     /**
@@ -61,7 +61,8 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
             if (was == Recording && value is Idle) {
                 try {
                     broadcaster.unregisterReceiver(recordingStateHandler)
-                } catch (swallow: Exception) { }
+                } catch (swallow: Exception) {
+                }
 
                 activity.unbindService(connection)
                 activity.stopService(recordingSession)
@@ -76,7 +77,9 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             val binder = service as RecorderService.LocalBinder
             serviceBinder = binder.service
-            serviceBinder?.setNotificationProvider(notificationProvider ?: defaultNotificationProvider)
+            serviceBinder?.setNotificationProvider(
+                notificationProvider ?: defaultNotificationProvider
+            )
         }
 
         override fun onServiceDisconnected(arg0: ComponentName) {
@@ -86,13 +89,14 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
 
     private var recordingSession: Intent? = null
 
-    private val dialogPermissionListener: DialogOnAnyDeniedMultiplePermissionsListener = DialogOnAnyDeniedMultiplePermissionsListener.Builder
-        .withContext(activity)
-        .withTitle("Storage permissions")
-        .withMessage("Storage permissions are needed to store the screen recording")
-        .withButtonText(android.R.string.ok)
-        .withIcon(R.drawable.ic_storage_permission_dialog)
-        .build()
+    private val dialogPermissionListener: DialogOnAnyDeniedMultiplePermissionsListener =
+        DialogOnAnyDeniedMultiplePermissionsListener.Builder
+            .withContext(activity)
+            .withTitle("Storage permissions")
+            .withMessage("Storage permissions are needed to store the screen recording")
+            .withButtonText(android.R.string.ok)
+            .withIcon(R.drawable.ic_storage_permission_dialog)
+            .build()
 
     private val defaultNotificationProvider by lazy {
         RecorderNotificationProvider(
@@ -132,12 +136,13 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
     private val recordingStateHandler = object : BroadcastReceiver() {
         override fun onReceive(p0: Context?, p1: Intent?) {
             p1?.action?.let { action ->
-                when(action) {
+                when (action) {
                     STATE_RECORDING -> state = Recording
                     STATE_IDLE -> state = Idle(p1.extras?.get(EXTRA_ERROR) as? Throwable)
                     STATE_DELAY -> {
                         state = Delay(p1.extras?.getInt(EXTRA_DELAY_REMAINING) ?: 0)
                     }
+
                     STATE_PAUSED -> state = Paused
                 }
             }
@@ -152,7 +157,8 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         get() {
             if (_outputFile == null) {
                 outputDirectory?.let { dir ->
-                    _outputFile = File("${dir.path}${File.separator}${options.storage.fileNameFormatter()}.mp4")
+                    _outputFile =
+                        File("${dir.path}${File.separator}${options.storage.fileNameFormatter()}.mp4")
                 } ?: return null
             }
             return _outputFile
@@ -172,29 +178,22 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         }
     }
 
-    private final ActivityResultLauncher<Intent> startRecording = activity.registerForActivityResult(
-        new RecordScreen(),
-        result -> {
-            if (result.getResultCode() == Activity.RESULT_OK) {
-                if (options.moveTaskToBack()) activity.moveTaskToBack(true);
-                File output = outputFile;
-                if (output != null) {
-                    startService(result, output);
-                    if (recordingCallback != null) {
-                        recordingCallback.onRecordingResult(true, "Recording started successfully.");
-                    }
-                } else {
-                    if (recordingCallback != null) {
-                        recordingCallback.onRecordingResult(false, "Output file is null.");
-                    }
-                }
+    private val startRecording = activity.registerForActivityResult(
+        RecordScreen()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            if (options.moveTaskToBack()) activity.moveTaskToBack(true)
+            val output = outputFile
+            if (output != null) {
+                startService(result, output)
+                recordingCallback?.onRecordingResult(true, "Recording started successfully.")
             } else {
-                if (recordingCallback != null) {
-                    recordingCallback.onRecordingResult(false, "Screen recording permission denied.");
-                }
+                recordingCallback?.onRecordingResult(false, "Output file is null.")
             }
+        } else {
+            recordingCallback?.onRecordingResult(false, "Screen recording permission denied.")
         }
-    );
+    }
 
     /**
      * Updates the configurations of [ScrCast] via a DSL.
@@ -207,6 +206,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
     fun options(opts: OptionsBuilder.() -> Unit) {
         options = handleDynamicVideoSize(OptionsBuilder().apply(opts).build())
     }
+
     /**
      * Updates the configurations of [ScrCast].
      *
@@ -219,7 +219,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
     /**
      * Set the recording callbacks, emitting changes of [RecordingState] as they occur and a link to the output [File]
      */
-    fun setRecordingCallback(listener : RecordingCallbacks?) {
+    fun setRecordingCallback(listener: RecordingCallbacks?) {
         onStateChange = { listener?.onStateChange(it) }
         onRecordingOutput = { listener?.onRecordingFinished(it) }
     }
@@ -256,8 +256,16 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
      * some clients may want to onboard users via an OOBE or some UX state involving previously recorded files.
      */
     fun hasStoragePermissions(): Boolean {
-        val perms = listOf(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE)
-        return perms.all { ActivityCompat.checkSelfPermission(activity, it) == PackageManager.PERMISSION_GRANTED }
+        val perms = listOf(
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        )
+        return perms.all {
+            ActivityCompat.checkSelfPermission(
+                activity,
+                it
+            ) == PackageManager.PERMISSION_GRANTED
+        }
     }
 
     /**
@@ -278,10 +286,11 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
      */
     fun record() {
         when (state) {
-            is Idle ->  startRecording()
+            is Idle -> startRecording()
             Paused -> resume()
             Recording -> stopRecording()
-            is Delay -> { /* Prevent erroneous calls to record while in start delay */}
+            is Delay -> { /* Prevent erroneous calls to record while in start delay */
+            }
         }
     }
 
@@ -341,7 +350,11 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
     }
 
     private fun scanForOutputFile() {
-        MediaScannerConnection.scanFile(activity, arrayOf(outputFile.toString()), null) { path, uri ->
+        MediaScannerConnection.scanFile(
+            activity,
+            arrayOf(outputFile.toString()),
+            null
+        ) { path, uri ->
             Log.i("scrcast", "scanned: $path")
             Log.i("scrcast", "-> uri=$uri")
             if (uri != null) {
@@ -355,7 +368,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         startRecording.launch()
     }
 
-    private fun startService(result: ActivityResult, file : File) {
+    private fun startService(result: ActivityResult, file: File) {
         recordingSession = Intent(activity, RecorderService::class.java).apply {
             putExtra("code", result.resultCode)
             putExtra("data", result.data)

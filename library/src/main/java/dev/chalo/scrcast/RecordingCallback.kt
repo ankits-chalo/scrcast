@@ -1,3 +1,3 @@
-public interface RecordingCallback {
-    void onRecordingResult(boolean success, String message);
+interface RecordingCallback {
+    fun onRecordingResult(success: Boolean, message: String)
 }
