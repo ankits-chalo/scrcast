@@ -34,12 +34,19 @@ import dev.chalo.scrcast.recorder.notification.NotificationProvider
 import dev.chalo.scrcast.internal.recorder.notification.RecorderNotificationProvider
 import dev.chalo.scrcast.internal.recorder.service.RecorderService
 import dev.chalo.scrcast.internal.request.RecordScreen
+import dev.chalo.scrcast.RecordingCallbacK
 import java.io.File
 
 /**
  * Main Interface for accessing [ScrCast] Library
  */
 class ScrCast private constructor(private val activity: ComponentActivity) {
+
+    private RecordingCallback recordingCallback;
+
+    public void setRecordingCallback(RecordingCallback callback) {
+        this.recordingCallback = callback;
+    }
 
     /**
      * The current [RecordingState] of the recorder
@@ -165,15 +172,29 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         }
     }
 
-    private val startRecording = activity.registerForActivityResult(RecordScreen()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            if (options.moveTaskToBack) activity.moveTaskToBack(true)
-            val output = outputFile
-            if (output != null) {
-                startService(result, output)
+    private final ActivityResultLauncher<Intent> startRecording = activity.registerForActivityResult(
+        new RecordScreen(),
+        result -> {
+            if (result.getResultCode() == Activity.RESULT_OK) {
+                if (options.moveTaskToBack()) activity.moveTaskToBack(true);
+                File output = outputFile;
+                if (output != null) {
+                    startService(result, output);
+                    if (recordingCallback != null) {
+                        recordingCallback.onRecordingResult(true, "Recording started successfully.");
+                    }
+                } else {
+                    if (recordingCallback != null) {
+                        recordingCallback.onRecordingResult(false, "Output file is null.");
+                    }
+                }
+            } else {
+                if (recordingCallback != null) {
+                    recordingCallback.onRecordingResult(false, "Screen recording permission denied.");
+                }
             }
         }
-    }
+    );
 
     /**
      * Updates the configurations of [ScrCast] via a DSL.
