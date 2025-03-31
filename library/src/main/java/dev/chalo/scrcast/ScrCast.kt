@@ -34,13 +34,16 @@ import dev.chalo.scrcast.recorder.notification.NotificationProvider
 import dev.chalo.scrcast.internal.recorder.notification.RecorderNotificationProvider
 import dev.chalo.scrcast.internal.recorder.service.RecorderService
 import dev.chalo.scrcast.internal.request.RecordScreen
-import dev.chalo.scrcast.RecordingCallback
 import java.io.File
 
 /**
  * Main Interface for accessing [ScrCast] Library
  */
 class ScrCast private constructor(private val activity: ComponentActivity) {
+
+    interface RecordingCallback {
+        fun onRecordingResult(success: Boolean, message: String)
+    }
 
     private var recordingCallback: RecordingCallback? = null
 
@@ -182,7 +185,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         RecordScreen()
     ) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
-            if (options.moveTaskToBack()) activity.moveTaskToBack(true)
+            if (options.moveTaskToBack) activity.moveTaskToBack(true)
             val output = outputFile
             if (output != null) {
                 startService(result, output)
