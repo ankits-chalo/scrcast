@@ -43,7 +43,15 @@ import java.io.File
  * Main Interface for accessing [ScrCast] Library
  */
 class ScrCast private constructor(private val activity: ComponentActivity) {
-
+    
+    init {
+        activity.lifecycle.addObserver(object : DefaultLifecycleObserver {
+            override fun onPause(owner: LifecycleOwner) {
+                super.onPause(owner)
+                stopRecording() // Stop recording when app is backgrounded
+            }
+        })
+    }
 
     interface PermissionCallback {
         fun onPermissionResult(success: Boolean, message: String?)
@@ -348,6 +356,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
      */
     fun stopRecording() {
         broadcaster.sendBroadcast(Intent(Action.Stop.name))
+        activity.stopService(recordingSession) // Stop the service
     }
 
     /**
