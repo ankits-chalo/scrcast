@@ -289,7 +289,13 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
      */
     fun record() {
         when (state) {
-            is Idle -> startRecording()
+            is Idle -> {
+                Dexter.withContext(activity)
+                    .withPermissions(Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.RECORD_AUDIO)
+                    .withListener(CompositeMultiplePermissionsListener(permissionListener, dialogPermissionListener))
+                    .check()
+            }
             Paused -> resume()
             Recording -> stopRecording()
             is Delay -> { /* Prevent erroneous calls to record while in start delay */
