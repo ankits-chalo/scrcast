@@ -174,26 +174,26 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
             return _outputFile
         }
 
- private val permissionListener = object : MultiplePermissionsListener {
-    override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
-        if (report != null && report.areAllPermissionsGranted()) {
-            Log.d("ScrCast", "All permissions granted, starting recording")
-            permissionCallback?.onPermissionResult(true, null) 
-            startRecording()
-        } else {
-            Log.d("ScrCast", "Permissions not granted, recording cancelled")
-             permissionCallback?.onPermissionResult(false, "Storage permission denied")
+    private val permissionListener = object : MultiplePermissionsListener {
+        override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
+            if (report != null && report.areAllPermissionsGranted()) {
+                Log.d("ScrCast", "All permissions granted, starting recording")
+                permissionCallback?.onPermissionResult(true, null)
+                startRecording()
+            } else {
+                Log.d("ScrCast", "Permissions not granted, recording cancelled")
+                permissionCallback?.onPermissionResult(false, "Storage permission denied")
+            }
+        }
+
+        override fun onPermissionRationaleShouldBeShown(
+            permissions: MutableList<PermissionRequest>?,
+            token: PermissionToken?
+        ) {
+            Log.d("ScrCast", "Permission rationale should be shown")
+            token?.continuePermissionRequest()
         }
     }
-
-    override fun onPermissionRationaleShouldBeShown(
-        permissions: MutableList<PermissionRequest>?,
-        token: PermissionToken?
-    ) {
-        Log.d("ScrCast", "Permission rationale should be shown")
-        token?.continuePermissionRequest()
-    }
-}
 
     private val startRecording = activity.registerForActivityResult(
         RecordScreen()
@@ -301,8 +301,8 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
      * @see [Options]
      * @see [MediaRecorder.start]
      */
-   fun record(callback: PermissionCallback? = null) {
-        permissionCallback = callback 
+    fun record(callback: PermissionCallback? = null) {
+        permissionCallback = callback
         when (state) {
             is Idle -> {
                 // Only check for storage permissions on devices before Android 14
@@ -317,7 +317,12 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
                             Manifest.permission.READ_EXTERNAL_STORAGE,
                             Manifest.permission.RECORD_AUDIO
                         )
-                        .withListener(CompositeMultiplePermissionsListener(permissionListener, dialogPermissionListener))
+                        .withListener(
+                            CompositeMultiplePermissionsListener(
+                                permissionListener,
+                                dialogPermissionListener
+                            )
+                        )
                         .check()
                 } else {
                     // For Android 14+, no need to ask for storage permissions
@@ -325,9 +330,11 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
                     startRecording()
                 }
             }
+
             Paused -> resume()
             Recording -> stopRecording()
-            is Delay -> { /* Prevent erroneous calls to record while in start delay */ }
+            is Delay -> { /* Prevent erroneous calls to record while in start delay */
+            }
         }
     }
 
@@ -405,12 +412,57 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         startRecording.launch()
     }
 
+    private fun saveToMediaStore(): File? {
+        val contentResolver = activity.contentResolver
+
+        // Create a new ContentValues object to insert into MediaStore
+        val contentValues = ContentValues().apply {
+            put(
+                MediaStore.MediaColumns.DISPLAY_NAME,
+                "screen_recording_${System.currentTimeMillis()}.mp4"
+            )
+            put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
+            put(
+                MediaStore.MediaColumns.RELATIVE_PATH,
+                Environment.DIRECTORY_MOVIES
+            )  // Save in Movies folder
+        }
+
+        // Insert the new video into the MediaStore
+        val uri = contentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+        return uri?.let {
+            // Now open the file descriptor and convert it to a file
+            val fileDescriptor = contentResolver.openFileDescriptor(it, "w")
+            fileDescriptor?.let {
+                val outputFile = File(fileDescriptor.fileDescriptor.toString())
+                // Ensure the file is properly created and handled
+                return outputFile
+            }
+        }
+        return null
+    }
+
+
     private fun startService(result: ActivityResult, file: File) {
+        val outputFile: File? = if (Build.VERSION.SDK_INT >= 34) {
+            // For Android 14 and higher, use MediaStore
+            saveToMediaStore()
+        } else {
+            // For older versions, use the traditional storage path
+            file
+        }
+
+        // If outputFile is still null, return
+        if (outputFile == null) {
+            recordingCallback?.onRecordingResult(false, "Failed to get output file.")
+            return
+        }
+
         recordingSession = Intent(activity, RecorderService::class.java).apply {
             putExtra("code", result.resultCode)
             putExtra("data", result.data)
             putExtra("options", options)
-            putExtra("outputFile", file.absolutePath)
+            putExtra("outputFile", outputFile.absolutePath)
             putExtra("dpi", dpi)
             putExtra("rotation", activity.windowManager.defaultDisplay.rotation)
         }
