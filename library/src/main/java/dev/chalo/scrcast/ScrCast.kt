@@ -16,8 +16,6 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.launch
 import androidx.core.app.ActivityCompat
-import androidx.lifecycle.DefaultLifecycleObserver
-import androidx.lifecycle.LifecycleOwner
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import android.provider.MediaStore
 import android.os.Environment
@@ -45,15 +43,7 @@ import java.io.File
  * Main Interface for accessing [ScrCast] Library
  */
 class ScrCast private constructor(private val activity: ComponentActivity) {
-    
-    init {
-        activity.lifecycle.addObserver(object : DefaultLifecycleObserver, LifecycleObserver {
-            override fun onStop(owner: LifecycleOwner) {
-                super.onStop(owner)
-                stopRecording() // Stop recording when app is backgrounded
-            }
-        })
-    }
+
 
     interface PermissionCallback {
         fun onPermissionResult(success: Boolean, message: String?)
@@ -327,8 +317,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
                     Dexter.withContext(activity)
                         .withPermissions(
                             Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                            Manifest.permission.READ_EXTERNAL_STORAGE,
-                            Manifest.permission.RECORD_AUDIO
+                            Manifest.permission.READ_EXTERNAL_STORAGE
                         )
                         .withListener(
                             CompositeMultiplePermissionsListener(
@@ -358,7 +347,6 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
      */
     fun stopRecording() {
         broadcaster.sendBroadcast(Intent(Action.Stop.name))
-        activity.stopService(recordingSession) // Stop the service
     }
 
     /**
