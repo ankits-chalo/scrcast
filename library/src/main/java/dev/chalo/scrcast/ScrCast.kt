@@ -41,11 +41,17 @@ import java.io.File
  */
 class ScrCast private constructor(private val activity: ComponentActivity) {
 
+
+    interface PermissionCallback {
+        fun onPermissionResult(success: Boolean, message: String?)
+    }
+
+
     interface RecordingCallback {
         fun onRecordingResult(success: Boolean, message: String)
     }
 
-    private var permissionCallback: ((Boolean, String?) -> Unit)? = null
+    private var permissionCallback: PermissionCallback? = null
     private var recordingCallback: RecordingCallback? = null
 
     fun setRecordingCallback(callback: RecordingCallback) {
@@ -172,11 +178,11 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
     override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
         if (report != null && report.areAllPermissionsGranted()) {
             Log.d("ScrCast", "All permissions granted, starting recording")
-            permissionCallback?.invoke(true, null) 
+            permissionCallback?.onPermissionResult(true, null) 
             startRecording()
         } else {
             Log.d("ScrCast", "Permissions not granted, recording cancelled")
-             permissionCallback?.invoke(false, "Storage permission denied")
+             permissionCallback?.onPermissionResult(false, "Storage permission denied")
         }
     }
 
@@ -295,7 +301,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
      * @see [Options]
      * @see [MediaRecorder.start]
      */
-   fun record(callback: ((Boolean, String?) -> Unit)? = null) {
+   fun record(callback: PermissionCallback? = null) {
     permissionCallback = callback 
     when (state) {
         is Idle -> {
