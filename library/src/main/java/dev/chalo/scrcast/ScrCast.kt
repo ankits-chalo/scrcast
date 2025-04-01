@@ -306,10 +306,10 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         when (state) {
             is Idle -> {
                 // Only check for storage permissions on devices before Android 14
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE && hasStoragePermissions()) {
+                if (Build.VERSION.SDK_INT < 29 && hasStoragePermissions()) {
                     Log.d("ScrCast", "Permissions already granted, starting recording")
                     startRecording()
-                } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                } else if (Build.VERSION.SDK_INT < 29) {
                     Log.d("ScrCast", "Requesting storage permissions")
                     Dexter.withContext(activity)
                         .withPermissions(
