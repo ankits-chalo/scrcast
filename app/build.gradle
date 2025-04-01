@@ -43,6 +43,6 @@ dependencies {
     implementation deps.jetpack.constraintlayout
     implementation deps.jetpack.appcompat
     implementation deps.jetpack.material
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.4.0"
-    implementation "androidx.lifecycle:lifecycle-common-java8:2.4.0"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.3.1"
+    implementation "androidx.lifecycle:lifecycle-common-java8:2.3.1"
 }
