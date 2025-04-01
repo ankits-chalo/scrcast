@@ -295,7 +295,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
      * @see [Options]
      * @see [MediaRecorder.start]
      */
-   fun record(callback: (Boolean, String?) -> Unit) {
+   fun record(callback: ((Boolean, String?) -> Unit)? = null) {
     permissionCallback = callback 
     when (state) {
         is Idle -> {
@@ -359,7 +359,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
             if (state.isPaused) {
                 broadcaster.sendBroadcast(Intent(Action.Resume.name))
             } else {
-                record()
+                record(null)
             }
         }
     }
