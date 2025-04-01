@@ -16,6 +16,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.launch
 import androidx.core.app.ActivityCompat
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import android.provider.MediaStore
 import android.os.Environment
@@ -45,9 +47,9 @@ import java.io.File
 class ScrCast private constructor(private val activity: ComponentActivity) {
     
     init {
-        activity.lifecycle.addObserver(object : DefaultLifecycleObserver {
-            override fun onPause(owner: LifecycleOwner) {
-                super.onPause(owner)
+        activity.lifecycle.addObserver(object : DefaultLifecycleObserver, LifecycleObserver {
+            override fun onStop(owner: LifecycleOwner) {
+                super.onStop(owner)
                 stopRecording() // Stop recording when app is backgrounded
             }
         })
