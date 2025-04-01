@@ -302,29 +302,34 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
      * @see [MediaRecorder.start]
      */
    fun record(callback: PermissionCallback? = null) {
-    permissionCallback = callback 
-    when (state) {
-        is Idle -> {
-            if (hasStoragePermissions()) {
-                Log.d("ScrCast", "Permissions already granted, starting recording")
-                startRecording()
-            } else {
-                Log.d("ScrCast", "Requesting permissions")
-                Dexter.withContext(activity)
-                    .withPermissions(
-                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                        Manifest.permission.READ_EXTERNAL_STORAGE,
-                        Manifest.permission.RECORD_AUDIO
-                    )
-                    .withListener(CompositeMultiplePermissionsListener(permissionListener, dialogPermissionListener))
-                    .check()
+        permissionCallback = callback 
+        when (state) {
+            is Idle -> {
+                // Only check for storage permissions on devices before Android 14
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE && hasStoragePermissions()) {
+                    Log.d("ScrCast", "Permissions already granted, starting recording")
+                    startRecording()
+                } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                    Log.d("ScrCast", "Requesting storage permissions")
+                    Dexter.withContext(activity)
+                        .withPermissions(
+                            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                            Manifest.permission.READ_EXTERNAL_STORAGE,
+                            Manifest.permission.RECORD_AUDIO
+                        )
+                        .withListener(CompositeMultiplePermissionsListener(permissionListener, dialogPermissionListener))
+                        .check()
+                } else {
+                    // For Android 14+, no need to ask for storage permissions
+                    Log.d("ScrCast", "Android 14+ detected, starting recording directly")
+                    startRecording()
+                }
             }
+            Paused -> resume()
+            Recording -> stopRecording()
+            is Delay -> { /* Prevent erroneous calls to record while in start delay */ }
         }
-        Paused -> resume()
-        Recording -> stopRecording()
-        is Delay -> { /* Prevent erroneous calls to record while in start delay */ }
     }
-}
 
     /**
      * Triggers the end to a recording session that was started via [record]
