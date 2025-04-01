@@ -117,9 +117,7 @@ public class JavaMainActivity extends AppCompatActivity {
             if (recorder.getState().isRecording()) {
                 recorder.stopRecording();
             } else {
-                recorder.record((success, message) -> {
-                    Log.d("MainActivity", "Recording Result: " + success + ", Message: " + message);
-                });
+                recorder.record(null);
             }
         });
     }
