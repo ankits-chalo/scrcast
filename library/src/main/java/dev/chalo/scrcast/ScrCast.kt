@@ -45,6 +45,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         fun onRecordingResult(success: Boolean, message: String)
     }
 
+    private var permissionCallback: ((Boolean, String?) -> Unit)? = null
     private var recordingCallback: RecordingCallback? = null
 
     fun setRecordingCallback(callback: RecordingCallback) {
@@ -167,19 +168,26 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
             return _outputFile
         }
 
-    private val permissionListener = object : MultiplePermissionsListener {
-        override fun onPermissionsChecked(p0: MultiplePermissionsReport?) {
-            Log.i("Permission listener", "testing")
+ private val permissionListener = object : MultiplePermissionsListener {
+    override fun onPermissionsChecked(report: MultiplePermissionsReport?) {
+        if (report != null && report.areAllPermissionsGranted()) {
+            Log.d("ScrCast", "All permissions granted, starting recording")
+            permissionCallback?.invoke(true, null) 
             startRecording()
-        }
-
-        override fun onPermissionRationaleShouldBeShown(
-            p0: MutableList<PermissionRequest>?,
-            p1: PermissionToken?
-        ) {
-            p1?.continuePermissionRequest()
+        } else {
+            Log.d("ScrCast", "Permissions not granted, recording cancelled")
+             permissionCallback?.invoke(false, "Storage permission denied")
         }
     }
+
+    override fun onPermissionRationaleShouldBeShown(
+        permissions: MutableList<PermissionRequest>?,
+        token: PermissionToken?
+    ) {
+        Log.d("ScrCast", "Permission rationale should be shown")
+        token?.continuePermissionRequest()
+    }
+}
 
     private val startRecording = activity.registerForActivityResult(
         RecordScreen()
@@ -287,15 +295,30 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
      * @see [Options]
      * @see [MediaRecorder.start]
      */
-    fun record() {
-        when (state) {
-            is Idle -> startRecording()
-            Paused -> resume()
-            Recording -> stopRecording()
-            is Delay -> { /* Prevent erroneous calls to record while in start delay */
+   fun record(callback: (Boolean, String?) -> Unit) {
+    permissionCallback = callback 
+    when (state) {
+        is Idle -> {
+            if (hasStoragePermissions()) {
+                Log.d("ScrCast", "Permissions already granted, starting recording")
+                startRecording()
+            } else {
+                Log.d("ScrCast", "Requesting permissions")
+                Dexter.withContext(activity)
+                    .withPermissions(
+                        Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                        Manifest.permission.READ_EXTERNAL_STORAGE,
+                        Manifest.permission.RECORD_AUDIO
+                    )
+                    .withListener(CompositeMultiplePermissionsListener(permissionListener, dialogPermissionListener))
+                    .check()
             }
         }
+        Paused -> resume()
+        Recording -> stopRecording()
+        is Delay -> { /* Prevent erroneous calls to record while in start delay */ }
     }
+}
 
     /**
      * Triggers the end to a recording session that was started via [record]
