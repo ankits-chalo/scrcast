@@ -414,74 +414,55 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         startRecording.launch()
     }
 
-    private fun saveToMediaStore(): File? {
+    private fun saveToMediaStore(): Uri? {
         val contentResolver = activity.contentResolver
-
-        // Create a new ContentValues object to insert into MediaStore
         val contentValues = ContentValues().apply {
-            put(
-                MediaStore.MediaColumns.DISPLAY_NAME,
-                "screen_recording_${System.currentTimeMillis()}.mp4"
-            )
+            put(MediaStore.MediaColumns.DISPLAY_NAME, "screen_recording_${System.currentTimeMillis()}.mp4")
             put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
-            put(
-                MediaStore.MediaColumns.RELATIVE_PATH,
-                Environment.DIRECTORY_MOVIES
-            )  // Save in Movies folder
+            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_MOVIES)
         }
 
-        // Insert the new video into the MediaStore
-        val uri = contentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
-        return uri?.let {
-            // Now open the file descriptor and convert it to a file
-            val fileDescriptor = contentResolver.openFileDescriptor(it, "w")
-            fileDescriptor?.let {
-                val outputFile = File(fileDescriptor.fileDescriptor.toString())
-                // Ensure the file is properly created and handled
-                return outputFile
-            }
-        }
-        return null
+        return contentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
     }
 
 
+
     private fun startService(result: ActivityResult, file: File) {
-        val outputFile: File? = if (Build.VERSION.SDK_INT >= 34) {
-            // For Android 14 and higher, use MediaStore
-            saveToMediaStore()
+        val outputUri: Uri? = if (Build.VERSION.SDK_INT >= 34) {
+                saveToMediaStore()  // Use MediaStore on Android 14+
         } else {
-            // For older versions, use the traditional storage path
-            file
+                Uri.fromFile(file)  // Use traditional storage path for older versions
         }
 
-        // If outputFile is still null, return
-        if (outputFile == null) {
-            recordingCallback?.onRecordingResult(false, "Failed to get output file.")
-            return
+        if (outputUri == null) {
+                recordingCallback?.onRecordingResult(false, "Failed to get output file.")
+                return
         }
 
+        // Ensure proper intent passing for Media Projection Service
         recordingSession = Intent(activity, RecorderService::class.java).apply {
-            putExtra("code", result.resultCode)
-            putExtra("data", result.data)
-            putExtra("options", options)
-            putExtra("outputFile", outputFile.absolutePath)
-            putExtra("dpi", dpi)
-            putExtra("rotation", activity.windowManager.defaultDisplay.rotation)
+                putExtra("code", result.resultCode)
+                putExtra("data", result.data)
+                putExtra("options", options)
+                putExtra("outputUri", outputUri.toString())  // Pass URI instead of absolute path
+                putExtra("dpi", dpi)
+                putExtra("rotation", activity.windowManager.defaultDisplay.rotation)
         }
 
         broadcaster.registerReceiver(
-            recordingStateHandler,
-            IntentFilter().apply {
-                addAction(STATE_IDLE)
-                addAction(STATE_RECORDING)
-                addAction(STATE_PAUSED)
-                addAction(STATE_DELAY)
-            }
+                recordingStateHandler,
+                IntentFilter().apply {
+                        addAction(STATE_IDLE)
+                        addAction(STATE_RECORDING)
+                        addAction(STATE_PAUSED)
+                        addAction(STATE_DELAY)
+                }
         )
 
         activity.bindService(recordingSession, connection, Context.BIND_AUTO_CREATE)
         activity.startService(recordingSession)
     }
+
 
     companion object {
         /**
