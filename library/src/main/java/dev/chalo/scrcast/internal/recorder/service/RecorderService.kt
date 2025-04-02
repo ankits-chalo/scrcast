@@ -1,7 +1,7 @@
 package dev.chalo.scrcast.internal.recorder.service
 
-import dev.chalo.scrcast.app.list.MyApp
-import dev.chalo.scrcast.app.R
+import dev.chalo.scrcast.MyApp
+import dev.chalo.scrcast.R
 import android.view.SurfaceView
 import android.view.Surface
 import android.os.ParcelFileDescriptor;

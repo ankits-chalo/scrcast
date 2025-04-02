@@ -2,6 +2,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="dev.chalo.scrcast">
 
+    <application
+        android:name=".MyApp"  
+        android:allowBackup="true"
+        android:theme="@style/AppTheme">
+    </application>
+
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.WRITE_INTERNAL_STORAGE"/>

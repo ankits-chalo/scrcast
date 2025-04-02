@@ -1,4 +1,4 @@
-package dev.chalo.scrcast.app.list// Change to your main app's package name
+package dev.chalo.scrcast// Change to your main app's package name
 
 import android.app.Activity
 import android.app.Application
