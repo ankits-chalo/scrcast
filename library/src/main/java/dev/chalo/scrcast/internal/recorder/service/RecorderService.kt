@@ -112,13 +112,19 @@ class RecorderService : Service() {
     private val virtualDisplay: VirtualDisplay?
         get() {
             if (_virtualDisplay == null) {
+                val displayMetrics = Resources.getSystem().displayMetrics
+                val width = displayMetrics.widthPixels
+                val height = displayMetrics.heightPixels
+                val density = displayMetrics.densityDpi
+                val surface = getAppSurface() // Get the app's surface for recording
+
                 _virtualDisplay = mediaProjection?.createVirtualDisplay(
-                    "SrcCast",
-                    options.video.width,
-                    options.video.height,
-                    dpi.toInt(),
+                    "AppScreenRecording",
+                    width,
+                    height,
+                    density,
                     DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-                    mediaRecorder?.surface,
+                    surface,
                     null,
                     null
                 )
@@ -127,6 +133,24 @@ class RecorderService : Service() {
         }
 
     private var mediaRecorder: MediaRecorder? = null
+
+    /**
+    * Returns the Surface of the current app window.
+    * Use a TextureView, SurfaceView, or other drawable component from the activity.
+    */
+    private fun getAppSurface(): Surface? {
+        val currentActivity = (applicationContext as? MyApp)?.currentActivity
+        return if (currentActivity != null) {
+            val surfaceView = currentActivity.findViewById<SurfaceView>(R.id.surface_view)
+            surfaceView?.holder?.surface ?: run {
+                Log.e("RecorderService", "SurfaceView is null or not available.")
+                null
+            }
+        } else {
+            Log.e("RecorderService", "No current activity found!")
+            null
+        }
+    }
 
     private fun createRecorder() {
 
@@ -324,7 +348,7 @@ class RecorderService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(
                         (this as Activity), // `this` must be an Activity, but `RecorderService` is a Service
                         arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
