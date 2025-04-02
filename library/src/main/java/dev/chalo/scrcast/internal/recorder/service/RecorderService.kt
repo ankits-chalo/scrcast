@@ -2,6 +2,7 @@ package dev.chalo.scrcast.internal.recorder.service
 
 
 import android.os.ParcelFileDescriptor;
+import android.util.DisplayMetrics;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import android.os.Environment
@@ -148,12 +149,18 @@ class RecorderService : Service() {
                 Log.e("scrcast", "FileDescriptor is null, cannot proceed.")
                 return
             }
+            DisplayMetrics metrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getRealMetrics(metrics);
+
+            int width = metrics.widthPixels;
+            int height = metrics.heightPixels;
+            int density = metrics.densityDpi;
             mediaRecorder = MediaRecorder().apply {
                 setVideoSource(VideoSource.SURFACE)
                 setOutputFormat(options.storage.outputFormat)
                 setOutputFile(fileDescriptor)
+                setVideoSize(width, height)
                 with(options.video) {
-                    setVideoSize(width, height)
                     setVideoEncoder(videoEncoder)
                     setVideoEncodingBitRate(bitrate)
                     setVideoFrameRate(frameRate)
