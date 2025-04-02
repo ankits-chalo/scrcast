@@ -112,53 +112,85 @@ class RecorderService : Service() {
     private var mediaRecorder: MediaRecorder? = null
 
     private fun createRecorder() {
+
+        val file = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            // Scoped Storage (Android 10+)
+            saveToMediaStore()
+        } else {
+            // Legacy Storage (Android 9 and below) - Save directly to DCIM folder
+            val legacyFile = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "ScreenRecord_${System.currentTimeMillis()}.mp4")
+            legacyFile.parentFile?.mkdirs() // Ensure directory exists
+            legacyFile
+        }
         Log.d("scrcast", "createRecorder()")
         mediaRecorder?.release()
         mediaRecorder = null
-        mediaRecorder = MediaRecorder().apply {
-            setVideoSource(VideoSource.SURFACE)
-            setOutputFormat(options.storage.outputFormat)
-            setOutputFile(outputFile)
-            with(options.video) {
-                setVideoSize(width, height)
-                setVideoEncoder(videoEncoder)
-                setVideoEncodingBitRate(bitrate)
-                setVideoFrameRate(frameRate)
-                if (maxLengthSecs > 0) {
-                    setMaxDuration(maxLengthSecs * 1000)
-                }
-            }
-            with(options.storage) {
-                if (maxSizeMB > 0) {
-                    setMaxFileSize((maxSizeMB * (1024 * 1024)).toLong())
-                }
-            }
-            setOnInfoListener { _, what, _ ->
-                when (what) {
-                    MEDIA_RECORDER_INFO_MAX_DURATION_REACHED -> {
-                        Log.d(
-                            "scrcast",
-                            "max duration of ${options.video.maxLengthSecs} seconds reached. Stopping reconrding..."
-                        )
-                        stopRecording()
+        try{
+            mediaRecorder = MediaRecorder().apply {
+                setVideoSource(VideoSource.SURFACE)
+                setOutputFormat(options.storage.outputFormat)
+                setOutputFile(outputFile)
+                with(options.video) {
+                    setVideoSize(width, height)
+                    setVideoEncoder(videoEncoder)
+                    setVideoEncodingBitRate(bitrate)
+                    setVideoFrameRate(frameRate)
+                    if (maxLengthSecs > 0) {
+                        setMaxDuration(maxLengthSecs * 1000)
                     }
-                    MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING -> Log.d(
-                        "scrcast",
-                        "Approaching max file size of ${options.storage.maxSizeMB}MB"
-                    )
-                    MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED -> {
-                        Log.d(
-                            "scrcast",
-                            "max file size of ${options.storage.maxSizeMB}MB reached. Stopping reconrding..."
-                        )
-                        stopRecording()
+                }
+                with(options.storage) {
+                    if (maxSizeMB > 0) {
+                        setMaxFileSize((maxSizeMB * (1024 * 1024)).toLong())
                     }
+                }
+                setOnInfoListener { _, what, _ ->
+                    when (what) {
+                        MEDIA_RECORDER_INFO_MAX_DURATION_REACHED -> {
+                            Log.d(
+                                "scrcast",
+                                "max duration of ${options.video.maxLengthSecs} seconds reached. Stopping reconrding..."
+                            )
+                            stopRecording()
+                        }
+                        MEDIA_RECORDER_INFO_MAX_FILESIZE_APPROACHING -> Log.d(
+                            "scrcast",
+                            "Approaching max file size of ${options.storage.maxSizeMB}MB"
+                        )
+                        MEDIA_RECORDER_INFO_MAX_FILESIZE_REACHED -> {
+                            Log.d(
+                                "scrcast",
+                                "max file size of ${options.storage.maxSizeMB}MB reached. Stopping reconrding..."
+                            )
+                            stopRecording()
+                        }
 
+                    }
                 }
+                setOrientationHint(orientation)
             }
-            setOrientationHint(orientation)
+            mediaRecorder?.prepare()
+        } catch (e: Exception) { 
+            Log.e("scrcast", "Error in createRecorder(): ${e.localizedMessage}")
         }
-        mediaRecorder?.prepare()
+    }
+
+    @RequiresApi(Build.VERSION_CODES.Q)
+    private fun saveToMediaStore(): File {
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Video.Media.DISPLAY_NAME, "ScreenRecord_${System.currentTimeMillis()}.mp4")
+            put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
+            put(MediaStore.Video.Media.RELATIVE_PATH, "DCIM/ScreenRecordings") // Saves under DCIM
+        }
+
+        val resolver = contentResolver
+        val videoUri: Uri? = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+
+        return videoUri?.let { uri ->
+            resolver.openFileDescriptor(uri, "w")?.use { pfd ->
+                File(pfd.fileDescriptor)
+            }
+        } ?: throw IOException("Failed to create MediaStore entry")
     }
 
     fun setNotificationProvider(provider: NotificationProvider) {
@@ -266,6 +298,16 @@ class RecorderService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                ActivityCompat.requestPermissions(
+                    (this as Activity), // `this` must be an Activity, but `RecorderService` is a Service
+                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                    100
+                )
+            }
+        }
+
         intent?.let {
             options = it.getParcelableExtra("options") ?: Options()
             rotation = it.getIntExtra("rotation", 0)
