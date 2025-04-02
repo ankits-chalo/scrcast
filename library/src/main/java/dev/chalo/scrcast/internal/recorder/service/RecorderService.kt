@@ -315,7 +315,6 @@ class RecorderService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        try{
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
                 if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
                     ActivityCompat.requestPermissions(
@@ -339,9 +338,6 @@ class RecorderService : Service() {
             }
 
             return START_STICKY
-        } catch(e: Exception) {
-            Log.d("scrcast",  "Error in onStartCommand(): ${e.localizedMessage}")
-        }
     }
 
     override fun onDestroy() {
