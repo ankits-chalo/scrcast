@@ -194,6 +194,7 @@ class RecorderService : Service() {
             mediaRecorder?.prepare()
         } catch (e: Exception) { 
             Log.e("scrcast", "Error in createRecorder(): ${e.localizedMessage}")
+            Log.d("scrcast", Log.getStackTraceString(e));
         }
     }
 
