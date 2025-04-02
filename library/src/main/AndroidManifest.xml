@@ -4,8 +4,7 @@
 
     <application
         android:name=".MyApp"  
-        android:allowBackup="true"
-        android:theme="@style/AppTheme">
+        android:allowBackup="true">
     </application>
 
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
