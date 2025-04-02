@@ -186,7 +186,7 @@ class RecorderService : Service() {
                 setVideoSource(VideoSource.SURFACE)
                 setOutputFormat(options.storage.outputFormat)
                 setOutputFile(fileDescriptor)
-                setVideoSize(720, 1080)
+                setVideoSize(720, 1280)
                 with(options.video) {
                     setVideoEncoder(videoEncoder)
                     setVideoEncodingBitRate(bitrate)
