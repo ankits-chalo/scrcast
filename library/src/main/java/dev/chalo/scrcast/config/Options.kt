@@ -106,7 +106,7 @@ data class VideoConfig @JvmOverloads constructor(
      *
      * @see [MediaRecorder.setVideoEncodingBitRate]
      */
-    val bitrate: Int = 8_000_000,
+    val bitrate: Int = 4_000_000,
     /**
      * Defines the video frame rate to be used for the recording.
      *
