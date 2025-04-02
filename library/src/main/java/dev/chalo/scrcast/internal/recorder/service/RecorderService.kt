@@ -1,5 +1,9 @@
 package dev.chalo.scrcast.internal.recorder.service
 
+
+import android.os.ParcelFileDescriptor;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import android.os.Environment
 import androidx.annotation.RequiresApi
 import android.content.ContentValues
@@ -124,19 +128,26 @@ class RecorderService : Service() {
 
     private fun createRecorder() {
 
-        val file = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            // Scoped Storage (Android 10+)
-            saveToMediaStore()
-        } else {
-            // Legacy Storage (Android 9 and below) - Save directly to DCIM folder
-            val legacyFile = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "ScreenRecord_${System.currentTimeMillis()}.mp4")
-            legacyFile.parentFile?.mkdirs() // Ensure directory exists
-            legacyFile
-        }
         Log.d("scrcast", "createRecorder()")
         mediaRecorder?.release()
         mediaRecorder = null
         try{
+            val fileDescriptor: FileDescriptor? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val videoUri = saveToMediaStore(this)
+                contentResolver.openFileDescriptor(videoUri, "w")?.fileDescriptor
+            } else {
+                val legacyFile = File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM),
+                    "ScreenRecord_${System.currentTimeMillis()}.mp4"
+                )
+                legacyFile.parentFile?.mkdirs()
+                legacyFile.outputStream().fd
+            }
+
+            if (fileDescriptor == null) {
+                Log.e("scrcast", "FileDescriptor is null, cannot proceed.")
+                return
+            }
             mediaRecorder = MediaRecorder().apply {
                 setVideoSource(VideoSource.SURFACE)
                 setOutputFormat(options.storage.outputFormat)
@@ -187,17 +198,16 @@ class RecorderService : Service() {
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    private fun saveToMediaStore(): Uri {
+    private fun saveToMediaStore(context: Context): Uri {
         val contentValues = ContentValues().apply {
             put(MediaStore.Video.Media.DISPLAY_NAME, "ScreenRecord_${System.currentTimeMillis()}.mp4")
             put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
             put(MediaStore.Video.Media.RELATIVE_PATH, "DCIM/ScreenRecordings") // Saves under DCIM
         }
 
-        val resolver = contentResolver
-        val videoUri: Uri? = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
-
-        return videoUri ?: throw IOException("Failed to create MediaStore entry")
+        val resolver = context.contentResolver
+        return resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+            ?: throw IOException("Failed to create MediaStore entry")
     }
 
     fun setNotificationProvider(provider: NotificationProvider) {
@@ -305,29 +315,33 @@ class RecorderService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-            if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                ActivityCompat.requestPermissions(
-                    (this as Activity), // `this` must be an Activity, but `RecorderService` is a Service
-                    arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                    100
+        try{
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                    ActivityCompat.requestPermissions(
+                        (this as Activity), // `this` must be an Activity, but `RecorderService` is a Service
+                        arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+                        100
+                    )
+                }
+            }
+
+            intent?.let {
+                options = it.getParcelableExtra("options") ?: Options()
+                rotation = it.getIntExtra("rotation", 0)
+                dpi = it.getFloatExtra("dpi", 0f)
+                outputFile = it.getStringExtra("outputFile") ?: ""
+
+                startRecording(
+                    code = it.getIntExtra("code", -1),
+                    data = it.getParcelableExtra("data") ?: Intent()
                 )
             }
+
+            return START_STICKY
+        } catch(e: Exception) {
+            Log.d("scrcast",  "Error in onStartCommand(): ${e.localizedMessage}")
         }
-
-        intent?.let {
-            options = it.getParcelableExtra("options") ?: Options()
-            rotation = it.getIntExtra("rotation", 0)
-            dpi = it.getFloatExtra("dpi", 0f)
-            outputFile = it.getStringExtra("outputFile") ?: ""
-
-            startRecording(
-                code = it.getIntExtra("code", -1),
-                data = it.getParcelableExtra("data") ?: Intent()
-            )
-        }
-
-        return START_STICKY
     }
 
     override fun onDestroy() {
