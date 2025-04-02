@@ -187,7 +187,7 @@ class RecorderService : Service() {
     }
 
     @RequiresApi(Build.VERSION_CODES.Q)
-    private fun saveToMediaStore(): File {
+    private fun saveToMediaStore(): Uri {
         val contentValues = ContentValues().apply {
             put(MediaStore.Video.Media.DISPLAY_NAME, "ScreenRecord_${System.currentTimeMillis()}.mp4")
             put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
@@ -197,11 +197,7 @@ class RecorderService : Service() {
         val resolver = contentResolver
         val videoUri: Uri? = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
 
-        return videoUri?.let { uri ->
-            resolver.openFileDescriptor(uri, "w")?.use { pfd ->
-                File(pfd.fileDescriptor)
-            }
-        } ?: throw IOException("Failed to create MediaStore entry")
+        return videoUri ?: throw IOException("Failed to create MediaStore entry")
     }
 
     fun setNotificationProvider(provider: NotificationProvider) {
