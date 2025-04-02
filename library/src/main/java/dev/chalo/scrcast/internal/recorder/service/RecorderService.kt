@@ -118,7 +118,6 @@ class RecorderService : Service() {
         mediaRecorder = MediaRecorder().apply {
             setVideoSource(VideoSource.SURFACE)
             setOutputFormat(options.storage.outputFormat)
-            setAudioEncoder(AudioEncoder.HE_AAC)
             setOutputFile(outputFile)
             with(options.video) {
                 setVideoSize(width, height)
