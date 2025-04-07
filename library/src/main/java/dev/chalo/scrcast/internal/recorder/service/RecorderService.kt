@@ -128,6 +128,10 @@ class RecorderService : Service() {
 
     private var mediaRecorder: MediaRecorder? = null
 
+    fun getOutputFile(): String {
+    return outputFile
+}
+
     private fun createRecorder() {
 
         Log.d("scrcast", "createRecorder()")
@@ -136,6 +140,7 @@ class RecorderService : Service() {
         try{
             val fileDescriptor: FileDescriptor? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 val videoUri = saveToMediaStore(this)
+                outputFile = videoUri.toString()
                 contentResolver.openFileDescriptor(videoUri, "w")?.fileDescriptor
             } else {
                 val legacyFile = File(
