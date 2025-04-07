@@ -441,6 +441,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
 
         // Ensure proper intent passing for Media Projection Service
         recordingSession = Intent(activity, RecorderService::class.java).apply {
+                putExtra("notificationOptions", options.notification)
                 putExtra("code", result.resultCode)
                 putExtra("data", result.data)
                 putExtra("options", options)

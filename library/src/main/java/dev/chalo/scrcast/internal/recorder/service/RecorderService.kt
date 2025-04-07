@@ -2,6 +2,7 @@ package dev.chalo.scrcast.internal.recorder.service
 
 
 import android.os.ParcelFileDescriptor;
+import dev.chalo.scrcast.internal.recorder.notification.NotificationOptions
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import java.io.FileDescriptor;
@@ -323,14 +324,10 @@ class RecorderService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                    ActivityCompat.requestPermissions(
-                        (this as Activity), // `this` must be an Activity, but `RecorderService` is a Service
-                        arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
-                        100
-                    )
-                }
+
+            val notificationOptions = intent?.getParcelableExtra<NotificationOptions>("notificationOptions")
+            if (!::notificationProvider.isInitialized) {
+                notificationProvider = RecorderNotificationProvider(this, notificationOptions ?: NotificationOptions())
             }
 
             intent?.let {
