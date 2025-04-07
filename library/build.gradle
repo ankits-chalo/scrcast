@@ -3,6 +3,7 @@ apply from: "$rootProject.projectDir/android-library.gradle"
 apply plugin: "org.jetbrains.dokka"
 apply plugin: "com.vanniktech.maven.publish"
 apply plugin: "maven-publish"
+apply plugin: "kotlin-parcelize"
 
 afterEvaluate {
     dokka {

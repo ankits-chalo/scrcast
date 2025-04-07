@@ -3,6 +3,7 @@ package dev.chalo.scrcast.internal.recorder.service
 
 import android.os.ParcelFileDescriptor;
 import dev.chalo.scrcast.internal.recorder.notification.NotificationOptions
+import dev.chalo.scrcast.internal.recorder.notification.RecorderNotificationProvider
 import android.content.res.Resources;
 import android.util.DisplayMetrics;
 import java.io.FileDescriptor;
