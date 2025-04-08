@@ -402,9 +402,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         ) { path, uri ->
             Log.i("scrcast", "scanned: $path")
             Log.i("scrcast", "-> uri=$uri")
-            if (uri != null) {
-                onRecordingOutput?.invoke(File(path))
-            }
+            onRecordingOutput?.invoke(File(path))
             _outputFile = null
         }
     }
