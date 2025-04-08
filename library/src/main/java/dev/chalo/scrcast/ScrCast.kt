@@ -265,7 +265,6 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
      *
      * This method is not accessible to the JVM.
      */
-    @JvmSynthetic
     fun onRecordingComplete(callback: RecordingOutputFileCallback) {
         onRecordingOutput = callback
     }
