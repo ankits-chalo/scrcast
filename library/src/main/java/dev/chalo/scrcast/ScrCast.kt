@@ -394,6 +394,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         return reconfig
     }
 
+    /*
     private fun scanForOutputFile() {
         MediaScannerConnection.scanFile(
             activity,
@@ -403,6 +404,45 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
             Log.i("scrcast", "scanned: $path")
             Log.i("scrcast", "-> uri=$uri")
             onRecordingOutput?.invoke(File(path))
+            _outputFile = null
+        }
+    }
+    */
+    private fun scanForOutputFile() {
+        if (!outputFile.exists() || outputFile.length() == 0L) {
+            Log.e("scrcast", "Output file doesn't exist or is empty")
+            return
+        }
+
+        MediaScannerConnection.scanFile(
+            activity,
+            arrayOf(outputFile.absolutePath),
+            arrayOf("video/mp4")
+        ) { path, uri ->
+            Log.i("scrcast", "scanned: $path")
+            Log.i("scrcast", "-> uri=$uri")
+
+            if (uri != null) {
+                // Safe to show Snackbar now, file is visible in Gallery
+                onRecordingOutput?.invoke(File(path))
+            } else {
+                // Fallback: wait 1-2 seconds and retry?
+                Log.w("scrcast", "URI was null — retrying scan after delay")
+
+                Handler(Looper.getMainLooper()).postDelayed({
+                    MediaScannerConnection.scanFile(
+                    activity,
+                    arrayOf(outputFile.absolutePath),
+                    arrayOf("video/mp4")
+                ) { retryPath, retryUri ->
+                    Log.i("scrcast", "Retry scanned: $retryPath")
+                    Log.i("scrcast", "-> retry uri=$retryUri")
+
+                    onRecordingOutput?.invoke(File(retryPath))
+                }
+                }, 1500)
+            }
+
             _outputFile = null
         }
     }
