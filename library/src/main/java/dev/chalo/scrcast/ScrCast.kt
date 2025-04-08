@@ -412,9 +412,9 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
     */
     private fun scanForOutputFile() {
         val file = outputFile
-        Log.d("scrcast", "File path: ${file.absolutePath}")
-        Log.d("scrcast", "File exists: ${file.exists()}")
-        Log.d("scrcast", "File size: ${file.length()}")
+        Log.d("scrcast", "File path: ${file?.absolutePath}")
+        Log.d("scrcast", "File exists: ${file?.exists()}")
+        Log.d("scrcast", "File size: ${file?.length()}")
         if (file == null) {
             Log.e("scrcast", "Output file is null")
             return
