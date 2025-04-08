@@ -411,7 +411,8 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
     }
     */
     private fun scanForOutputFile() {
-        if (!outputFile.exists() || outputFile.length() == 0L) {
+        val file = outputFile
+        if (file == null || !file.exists() || file.length() == 0L) {
             Log.e("scrcast", "Output file doesn't exist or is empty")
             return
         }
