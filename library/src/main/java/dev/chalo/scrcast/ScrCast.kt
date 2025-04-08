@@ -419,7 +419,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
 
         MediaScannerConnection.scanFile(
             activity,
-            arrayOf(outputFile.absolutePath),
+            arrayOf(outputFile.toString()),
             arrayOf("video/mp4")
         ) { path, uri ->
             Log.i("scrcast", "scanned: $path")
@@ -435,7 +435,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
                 Handler(Looper.getMainLooper()).postDelayed({
                     MediaScannerConnection.scanFile(
                     activity,
-                    arrayOf(outputFile.absolutePath),
+                    arrayOf(outputFile.toString()),
                     arrayOf("video/mp4")
                 ) { retryPath, retryUri ->
                     Log.i("scrcast", "Retry scanned: $retryPath")
