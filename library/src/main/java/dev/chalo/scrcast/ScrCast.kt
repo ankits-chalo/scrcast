@@ -169,15 +169,15 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         get() = options.storage.mediaStorageLocation
 
     private var _outputFile: File? = null
+    private var _outputUri: Uri? = null 
     private val outputFile: File?
         get() {
-            if (_outputFile == null) {
+            return _outputFile ?: run {
+                // Optional fallback
                 outputDirectory?.let { dir ->
-                    _outputFile =
-                        File("${dir.path}${File.separator}${options.storage.fileNameFormatter()}.mp4")
-                } ?: return null
+                    File("${dir.path}${File.separator}${options.storage.fileNameFormatter()}.mp4")
+                }
             }
-            return _outputFile
         }
 
     private val permissionListener = object : MultiplePermissionsListener {
@@ -411,6 +411,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         }
     }
     */
+    /*
     private fun scanForOutputFile() {
         val file = outputFile
         Log.d("scrcast", "File path: ${file?.absolutePath}")
@@ -465,11 +466,69 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
             _outputFile = null
         }
     }
+    */
+
+    private fun scanForOutputFile() {
+        val file = outputFile
+        val uri = _outputUri
+
+        if (Build.VERSION.SDK_INT >= 29 && uri != null) {
+            Log.d("scrcast", "Scanning via URI: $uri")
+
+            MediaScannerConnection.scanFile(
+                activity,
+                arrayOf(uri.toString()), // May not work on all devices — fallback below
+                arrayOf("video/mp4")
+            ) { path, scannedUri ->
+                Log.i("scrcast", "scanned: $path")
+                Log.i("scrcast", "-> uri=$scannedUri")
+
+                if (scannedUri != null) {
+                    onRecordingOutput?.invoke(File("/sdcard/DCIM/ScreenRecordings")) // Optional dummy
+                } else {
+                    Log.w("scrcast", "URI was null — retrying scan after delay")
+                    Handler(Looper.getMainLooper()).postDelayed({
+                        MediaScannerConnection.scanFile(
+                            activity,
+                            arrayOf(uri.toString()),
+                            arrayOf("video/mp4")
+                        ) { retryPath, retryUri ->
+                            Log.i("scrcast", "Retry scanned: $retryPath")
+                            Log.i("scrcast", "-> retry uri=$retryUri")
+
+                            onRecordingOutput?.invoke(File("/sdcard/DCIM/ScreenRecordings")) // Or skip entirely
+                        }
+                    }, 1500)
+                }
+            }
+
+        return
+        }
+
+        // Fallback for Android < 29
+        if (file == null || !file.exists() || file.length() == 0L) {
+            Log.e("scrcast", "Output file is invalid: ${file?.absolutePath}")
+            return
+        }
+
+        Log.d("scrcast", "Scanning local file: ${file.absolutePath}")
+
+        MediaScannerConnection.scanFile(
+            activity,
+            arrayOf(file.absolutePath),
+            arrayOf("video/mp4")
+        ) { path, scannedUri ->
+            Log.i("scrcast", "scanned: $path")
+            Log.i("scrcast", "-> uri=$scannedUri")
+            onRecordingOutput?.invoke(File(path))
+        }
+    }
+
 
     private fun startRecording() {
         startRecording.launch()
     }
-
+    /*
     private fun saveToMediaStore(): Uri {
         val contentValues = ContentValues().apply {
             put(MediaStore.Video.Media.DISPLAY_NAME, "ScreenRecord_${System.currentTimeMillis()}.mp4")
@@ -481,15 +540,46 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         return resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
             ?: throw IOException("Failed to create MediaStore entry")
     }
+    */
+
+    private fun saveToMediaStore(): Uri {
+        val resolver = activity.contentResolver
+        val fileName = "ScreenRecord_${System.currentTimeMillis()}.mp4"
+
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Video.Media.DISPLAY_NAME, fileName)
+            put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
+            put(MediaStore.Video.Media.RELATIVE_PATH, "DCIM/ScreenRecordings")
+        }
+
+        val uri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+            ?: throw IOException("Failed to create MediaStore entry")
+
+        _outputUri = uri
+
+        // Try to resolve this to a file if possible (for internal tracking)
+        if (Build.VERSION.SDK_INT < 30) {
+            // You can only get path reliably below API 30
+            val path = File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM), "ScreenRecordings/$fileName")
+            _outputFile = path
+        } else {
+            _outputFile = null // Cannot reliably resolve path in API 30+
+        }
+
+    return uri
+}
 
 
 
     private fun startService(result: ActivityResult, file: File) {
+        /*
         val outputUri: Uri? = if (Build.VERSION.SDK_INT >= 29) {
                 saveToMediaStore()  // Use MediaStore on Android 14+
         } else {
                 Uri.fromFile(file)  // Use traditional storage path for older versions
         }
+        */
+        val outputUri: Uri? = saveToMediaStore() 
 
         if (outputUri == null) {
                 recordingCallback?.onRecordingResult(false, "Failed to get output file.")
