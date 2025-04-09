@@ -59,7 +59,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
 
     private var permissionCallback: PermissionCallback? = null
     private var recordingCallback: RecordingCallback? = null
-
+    var fileName: String = ""
     fun setRecordingCallback(callback: RecordingCallback) {
         recordingCallback = callback
     }
@@ -484,7 +484,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
                 Log.i("scrcast", "-> uri=$scannedUri")
 
                 if (scannedUri != null) {
-                    onRecordingOutput?.invoke(File("/sdcard/DCIM/ScreenRecordings")) // Optional dummy
+                    onRecordingOutput?.invoke(File("/sdcard/DCIM/ScreenRecordings/$fileName")) // Optional dummy
                 } else {
                     Log.w("scrcast", "URI was null — retrying scan after delay")
                     Handler(Looper.getMainLooper()).postDelayed({
@@ -496,7 +496,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
                             Log.i("scrcast", "Retry scanned: $retryPath")
                             Log.i("scrcast", "-> retry uri=$retryUri")
 
-                            onRecordingOutput?.invoke(File("/sdcard/DCIM/ScreenRecordings")) // Or skip entirely
+                            onRecordingOutput?.invoke(File("/sdcard/DCIM/ScreenRecordings/$fileName")) // Or skip entirely
                         }
                     }, 1500)
                 }
@@ -544,7 +544,7 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
 
     private fun saveToMediaStore(): Uri {
         val resolver = activity.contentResolver
-        val fileName = "ScreenRecord_${System.currentTimeMillis()}.mp4"
+        fileName = "ScreenRecord_${System.currentTimeMillis()}.mp4"
 
         val contentValues = ContentValues().apply {
             put(MediaStore.Video.Media.DISPLAY_NAME, fileName)
