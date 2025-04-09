@@ -134,8 +134,8 @@ class RecorderService : Service() {
         mediaRecorder?.release()
         mediaRecorder = null
         try{
-            val fileDescriptor: FileDescriptor? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val videoUri = saveToMediaStore(this)
+            val fileDescriptor: FileDescriptor? = if (Build.VERSION.SDK_INT >= 29) {
+                val videoUri = outputFile
                 contentResolver.openFileDescriptor(videoUri, "w")?.fileDescriptor
             } else {
                 val legacyFile = File(
@@ -337,7 +337,7 @@ class RecorderService : Service() {
                 options = it.getParcelableExtra("options") ?: Options()
                 rotation = it.getIntExtra("rotation", 0)
                 dpi = it.getFloatExtra("dpi", 0f)
-                outputFile = it.getStringExtra("outputFile") ?: ""
+                outputFile = it.getStringExtra("outputUri") ?: ""
 
                 startRecording(
                     code = it.getIntExtra("code", -1),

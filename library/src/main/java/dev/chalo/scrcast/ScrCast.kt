@@ -469,21 +469,22 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         startRecording.launch()
     }
 
-    private fun saveToMediaStore(): Uri? {
-        val contentResolver = activity.contentResolver
+    private fun saveToMediaStore(context: Context): Uri {
         val contentValues = ContentValues().apply {
-            put(MediaStore.MediaColumns.DISPLAY_NAME, "screen_recording_${System.currentTimeMillis()}.mp4")
-            put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4")
-            put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_MOVIES)
+            put(MediaStore.Video.Media.DISPLAY_NAME, "ScreenRecord_${System.currentTimeMillis()}.mp4")
+            put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
+            put(MediaStore.Video.Media.RELATIVE_PATH, "DCIM/ScreenRecordings") // Saves under DCIM
         }
 
-        return contentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+        val resolver = context.contentResolver
+        return resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
+            ?: throw IOException("Failed to create MediaStore entry")
     }
 
 
 
     private fun startService(result: ActivityResult, file: File) {
-        val outputUri: Uri? = if (Build.VERSION.SDK_INT >= 34) {
+        val outputUri: Uri? = if (Build.VERSION.SDK_INT >= 29) {
                 saveToMediaStore()  // Use MediaStore on Android 14+
         } else {
                 Uri.fromFile(file)  // Use traditional storage path for older versions
