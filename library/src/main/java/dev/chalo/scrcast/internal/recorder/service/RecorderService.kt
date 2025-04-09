@@ -135,7 +135,7 @@ class RecorderService : Service() {
         mediaRecorder = null
         try{
             val fileDescriptor: FileDescriptor? = if (Build.VERSION.SDK_INT >= 29) {
-                val videoUri = outputFile
+                val videoUri = Uri.parse(outputFile)
                 contentResolver.openFileDescriptor(videoUri, "w")?.fileDescriptor
             } else {
                 val legacyFile = File(
