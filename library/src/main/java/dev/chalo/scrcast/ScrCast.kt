@@ -469,14 +469,14 @@ class ScrCast private constructor(private val activity: ComponentActivity) {
         startRecording.launch()
     }
 
-    private fun saveToMediaStore(context: Context): Uri {
+    private fun saveToMediaStore(): Uri {
         val contentValues = ContentValues().apply {
             put(MediaStore.Video.Media.DISPLAY_NAME, "ScreenRecord_${System.currentTimeMillis()}.mp4")
             put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
             put(MediaStore.Video.Media.RELATIVE_PATH, "DCIM/ScreenRecordings") // Saves under DCIM
         }
 
-        val resolver = context.contentResolver
+       val resolver = activity.contentResolver
         return resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues)
             ?: throw IOException("Failed to create MediaStore entry")
     }
