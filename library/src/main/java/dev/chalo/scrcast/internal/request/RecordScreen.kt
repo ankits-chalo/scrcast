@@ -13,19 +13,14 @@ import androidx.annotation.RestrictTo
 class RecordScreen : ActivityResultContract<Void, ActivityResult>() {
     override fun createIntent(context: Context, input: Void?): Intent {
         val pm = context.getSystemService(MediaProjectionManager::class.java)
+            ?: throw IllegalStateException("MediaProjectionManager is not available")
 
-        return if (pm != null) {
-            // Check if the API level is 31 or higher
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                // Use MediaProjectionConfig for Android 12 (API 31) and above
-                pm.createScreenCaptureIntent(MediaProjectionConfig.createConfigForDefaultDisplay())
-            } else {
-                // Fallback for lower API levels
-                pm.createScreenCaptureIntent()
-            }
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            // Use MediaProjectionConfig for Android 12 (API 31) and above
+            pm.createScreenCaptureIntent(MediaProjectionConfig.createConfigForDefaultDisplay())
         } else {
-            // Handle the case where MediaProjectionManager is not available
-            throw IllegalStateException("MediaProjectionManager is not available")
+            // Fallback for lower API levels (just use the default intent)
+            pm.createScreenCaptureIntent()
         }
     }
 
@@ -33,10 +28,3 @@ class RecordScreen : ActivityResultContract<Void, ActivityResult>() {
         return ActivityResult(resultCode, intent)
     }
 }
-
-
-
-
-
-
-
