@@ -16,7 +16,7 @@ class RecordScreen : ActivityResultContract<Void?, ActivityResult>() {
             ?: throw IllegalStateException("MediaProjectionManager is not available")
 
         // This will always prompt for full screen capture permission
-        return pm.createScreenCaptureIntent()
+        return pm.createScreenCaptureIntent(android.media.projection.MediaProjectionConfig)
     }
 
     override fun parseResult(resultCode: Int, intent: Intent?): ActivityResult {
